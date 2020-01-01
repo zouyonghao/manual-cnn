@@ -1,10 +1,11 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """manual-cnn"""
 
 __author__ = 'Yong-Hao Zou'
 
 import struct
+
+import numpy as np
 
 
 def _read_idx3(name):
@@ -51,6 +52,15 @@ def get_test_data():
 
 def get_test_label():
     return _read_idx1("t10k-labels.idx1-ubyte")
+
+#
+# def initialize_filter(size, scale=1.0):
+#     stddev = scale / np.sqrt(np.prod(size))
+#     return np.random.normal(loc=0, scale=stddev, size=size)
+
+
+def initialize_weight(size):
+    return np.random.standard_normal(size=size) * 0.01
 
 
 if __name__ == "__main__":
