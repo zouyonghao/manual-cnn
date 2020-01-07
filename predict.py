@@ -12,9 +12,9 @@ from tools import *
 
 params = pickle.load(open("save", 'rb'))
 
-[f1, b1, fc_w, fc_b] = params
-print(f1)
-print(b1)
+[f1, b1, fc_w1, fc_b1, fc_w2, fc_b2] = params
+# print(f1)
+# print(b1)
 
 # predict
 images_data = get_test_data()
@@ -34,14 +34,15 @@ for i in range(len(X)):
     # convolution
     convolution_result = convolution(image=x, filter_=f1, bias=b1)
     convolution_result[convolution_result <= 0] = 0
-    pooled = maxpool(convolution_result, 3, 3)
+    pooled = maxpool(convolution_result, 3, 1)
     (nf2, dim2, _) = pooled.shape
     fc = pooled.reshape((nf2 * dim2 * dim2, 1))
-    out = fc_w.dot(fc) + fc_b
-    result = softmax(out)
+    fc1_result = fc_w1.dot(fc) + fc_b1
+    fc2_result = fc_w2.dot(fc1_result) + fc_b2
+    result = softmax(fc2_result)
     predict = np.argmax(result)
     if predict == y[i]:
         correct += 1
-    print(predict)
-    print(y[i])
+    # print(predict)
+    # print(y[i])
     print(correct / (i + 1))
