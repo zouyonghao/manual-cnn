@@ -53,7 +53,6 @@ for epoch in range(3):
         images = images.reshape(len(batch), 28, 28)
         labels = batch[:, -1]
 
-        # initialize gradients
         df1 = np.zeros(f1.shape)
         db1 = np.zeros(b1.shape)
         dfc_w1 = np.zeros(fc_w1.shape)
@@ -62,14 +61,13 @@ for epoch in range(3):
         dfc_b2 = np.zeros(fc_b2.shape)
 
         loss = 0
-
         for i in range(batch_size):
             image = images[i]
-            # one-hot
+            # 标签转为onehot
             label = np.eye(10)[int(labels[i])].reshape(10, 1)
             # print(label)
 
-            # convolution
+            # 卷积
             convolution_result = convolution(image=image, filter_=f1, bias=b1)
 
             # ReLU
@@ -78,10 +76,10 @@ for epoch in range(3):
             # 3x3 maxpool
             pooled = maxpool(convolution_result, 3, 1)
 
-            (nf2, dim2, _) = pooled.shape
-            fc = pooled.reshape((nf2 * dim2 * dim2, 1))
+            (depth, size, _) = pooled.shape
+            fc = pooled.reshape((depth * size * size, 1))
 
-            # fully connection
+            # 两个全连接层
             fc1_result = fc_w1.dot(fc) + fc_b1
             fc1_result[fc1_result <= 0] = 0
             fc2_result = fc_w2.dot(fc1_result) + fc_b2
@@ -93,7 +91,7 @@ for epoch in range(3):
             # print("loss=" + str(loss))
             loss += loss_
 
-            # back propagation
+            # 反向传播
             dout = result - label
 
             # dout[dout < 0] = 0
@@ -101,6 +99,7 @@ for epoch in range(3):
             dfc_b2_ = np.sum(dout, axis=1).reshape(fc_b2.shape)
 
             dfc_1_ = fc_w2.T.dot(dout)
+            # 这里注意ReLU的反向传播需要使用之前的结果
             dfc_1_[fc1_result <= 0] = 0
 
             dfc_w1_ = dfc_1_.dot(fc.T)
@@ -112,7 +111,6 @@ for epoch in range(3):
 
             dconv = maxpool_backward(dpool, convolution_result, 3, 1)
 
-            # backpropagate through ReLU
             dconv[convolution_result <= 0] = 0
 
             _, df1_, db1_ = convolution_backward(dconv, image, f1)
@@ -137,6 +135,7 @@ for epoch in range(3):
         # fc_w2 -= lr * dfc_w2
         # fc_b2 -= lr * dfc_b2
 
+        # 更新梯度
         f1 -= lr * df1 / batch_size
         b1 -= lr * db1 / batch_size
         fc_w1 -= lr * dfc_w1 / batch_size

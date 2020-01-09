@@ -31,13 +31,13 @@ y = test_data[:, -1]
 correct = 0
 for i in range(len(X)):
     x = X[i]
-    # convolution
     convolution_result = convolution(image=x, filter_=f1, bias=b1)
     convolution_result[convolution_result <= 0] = 0
     pooled = maxpool(convolution_result, 3, 1)
     (nf2, dim2, _) = pooled.shape
     fc = pooled.reshape((nf2 * dim2 * dim2, 1))
     fc1_result = fc_w1.dot(fc) + fc_b1
+    fc1_result[fc1_result <= 0] = 0
     fc2_result = fc_w2.dot(fc1_result) + fc_b2
     result = softmax(fc2_result)
     predict = np.argmax(result)
